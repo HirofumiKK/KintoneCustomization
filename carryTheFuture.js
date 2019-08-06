@@ -2,9 +2,6 @@
     kintone.events.on("app.record.index.show", function(event){
         "use strict";
         console.log(event);
-        console.log(event.records);
-        console.log(event.records[1]);
-        console.log(event.records[1].Text.value);
         let  payerInfo = event.records[1];
         console.log(payerInfo.Link_1.value); // phone number
         console.log(payerInfo.Link.value); // email
@@ -18,14 +15,12 @@
         // returns a bool
         // true if payer's email is in donor's list, else false
         function payerIsExistingDonor(payerEmail, donorList){
-            let result = false;
             for(let i = 0; i < donorList.length; i++){
                 if(donorList[i].Link.value === payerEmail){ // "Link" is the field id of the email address
-                    result = true;
-                    break;
+                    return true;
                 }
             }
-            return result;
+            return false;
         }
 
 
@@ -75,43 +70,35 @@
             }
        }
 
-
+       // app id of the donors app and field id of the emails
         var body = {
             "app": 17,
-            "fields": ["Link"]
+            "fields": "Link"
         };
-            
         kintone.api(kintone.api.url('/k/v1/records', true), 'GET', body, function(resp) {
             // success
             console.log(resp);
-            console.log(resp.records);
-            console.log(resp.records[0]);
-            console.log(resp.records[0].Link)
-            console.log(resp.records[0].Link.value);
-            console.log(resp.records.length);
-
-            let payerEmail = "emailAddress@gmail.com";
-            console.log(payerIsExistingDonor(payerEmail, resp.records));
-            console.log(!payerIsExistingDonor(payerEmail, resp.records));
+            console.log(event);
+            console.log(event.records.length);
             //console.log("addPayerToDonorIfNew: ", addPayerToDonorIfNew());
 
-            let newPayer = event.records[0];
-            let newPayerEmail = newPayer.Link.value;
-            if(!payerIsExistingDonor(newPayerEmail, resp.records)){
-                addPayerToDonor(newPayer);
-                console.log("The new payer is added as a new donor!");
-            }else{
-                console.log("The new payer already exists in donors list.");
+            for(let i = 0; i < event.records.length; i++){
+                let newPayer = event.records[i];
+                let newPayerEmail = newPayer.Link.value;
+                if(!payerIsExistingDonor(newPayerEmail, resp.records)){
+                    addPayerToDonor(newPayer);
+                    console.log(newPayerEmail, " is added as a new donor!");
+                }else{
+                    console.log(newPayerEmail, " already exists in donors list.");
+                }
             }
 
         }, function(error) {
             // error
             console.log(error);
         });            
-
         console.log("success");
     });
-
     /*
     kintone.events.on("app.record.create.submit.success", function(event) {
         var record = event.record;
@@ -119,4 +106,3 @@
      });
      */
 })();
-
