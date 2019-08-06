@@ -47,10 +47,10 @@
        add the record to donor with assumption that event is listened correctly
        */
 
+       // takes payer info from Transactions app and adds a new record in Final Donors List app
        function addPayerToDonor(payerInfo){
-           // I may need to come with a better structure than this for input variables
             var body = {
-                'app': 17,
+                'app': 17, // app id of the Final Donor List app
                 'record':{
                     "Text": {"value": payerInfo.Text.value}, // Name
                     // "Monthly Donor Status" and "Donor Type" cannot be identified from the transactions app
@@ -70,6 +70,28 @@
             }
        }
 
+
+       // adds a button to reload the page, updating the Final Donor List
+       function reloadButton(){
+            //Prevent duplication of the button
+            if (document.getElementById ('my_index_button') != null) {
+                return;
+            }　　　
+            // Set a button
+            var myIndexButton = document.createElement('button');
+            myIndexButton.id = 'my_index_button';
+            myIndexButton.innerHTML = 'Update Final Donor List';
+        
+            // Button onclick function
+            myIndexButton.onclick = function() {
+                location.reload();
+                window.alert('Updated Final Donor List!');
+            }
+            // Retrieve the header menu space element and set the button there
+            kintone.app.getHeaderMenuSpaceElement().appendChild(myIndexButton);
+       }
+
+
        // app id of the donors app and field id of the emails
         var body = {
             "app": 17,
@@ -82,6 +104,7 @@
             console.log(event.records.length);
             //console.log("addPayerToDonorIfNew: ", addPayerToDonorIfNew());
 
+            // update the Final Donor List app by adding a new record for payers not in the donor list
             for(let i = 0; i < event.records.length; i++){
                 let newPayer = event.records[i];
                 let newPayerEmail = newPayer.Link.value;
@@ -97,6 +120,7 @@
             // error
             console.log(error);
         });            
+        reloadButton();
         console.log("success");
     });
     /*

@@ -15,7 +15,6 @@
         }
 
 
-
         // takes payer info from Transactions app and adds a new record in Final Donors List app
         function addPayerToDonor(payerInfo){
             let body = {
@@ -40,6 +39,26 @@
         }
 
 
+        // adds a button to reload the page, updating the Final Donor List
+        function reloadButton(){
+            //Prevent duplication of the button
+            if (document.getElementById ('my_index_button') != null) {
+                return;
+            }　　　
+            // Set a button
+            var myIndexButton = document.createElement('button');
+            myIndexButton.id = 'my_index_button';
+            myIndexButton.innerHTML = 'Update Final Donor List';
+        
+            // Button onclick function
+            myIndexButton.onclick = function() {
+                location.reload();
+                window.alert('Updated Final Donor List!');
+            }
+            // Retrieve the header menu space element and set the button there
+            kintone.app.getHeaderMenuSpaceElement().appendChild(myIndexButton);
+        }
+
 
         let body = {"app": 18}; // app id of the transactions app
         kintone.api(kintone.api.url('/k/v1/records', true), 'GET', body, function(resp) {
@@ -60,5 +79,7 @@
             // error
             console.log(error);
         })
+        reloadButton();
+        console.log("success");
     });
 })();
