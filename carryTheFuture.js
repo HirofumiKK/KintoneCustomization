@@ -71,6 +71,12 @@
        }
 
 
+       // traverse through all the transactions and donor list to compare them to update donor list
+       function updateTheFinalDonorList(){
+           
+       }
+
+
        // adds a button to reload the page, updating the Final Donor List
        function reloadButton(){
             //Prevent duplication of the button
@@ -78,7 +84,7 @@
                 return;
             }　　　
             // Set a button
-            var myIndexButton = document.createElement('button');
+            let myIndexButton = document.createElement('button');
             myIndexButton.id = 'my_index_button';
             myIndexButton.innerHTML = 'Update Final Donor List';
         
@@ -99,10 +105,9 @@
                 return;
             }　　　
             // Set a button
-            var myIndexButton = document.createElement('button');
+            let myIndexButton = document.createElement('button');
             myIndexButton.id = 'my_index_button';
             myIndexButton.innerHTML = 'View Updated Final Donor List';
-        
             // Button onclick function
             myIndexButton.onclick = function() {
                 let donorListURL = "https://carrythefuture.kintone.com/k/17/";
@@ -126,7 +131,7 @@
             //console.log("addPayerToDonorIfNew: ", addPayerToDonorIfNew());
 
             // update the Final Donor List app by adding a new record for payers not in the donor list
-            for(let i = 0; i < event.records.length; i++){
+            for(let i = event.records.length - 1; i >= 0; i--){
                 let newPayer = event.records[i];
                 let newPayerEmail = newPayer.Link.value;
                 if(!payerIsExistingDonor(newPayerEmail, resp.records)){
@@ -144,10 +149,7 @@
         buttonToRedirectToDonorList();
         console.log("success");
     });
-    /*
-    kintone.events.on("app.record.create.submit.success", function(event) {
-        var record = event.record;
-        console.log("The record ID is " + record["$id"]["value"] + ".");
-     });
-     */
+
+    // listening event for when a new record is created
+
 })();

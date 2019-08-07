@@ -86,7 +86,7 @@
             //success
             console.log(resp);
             // update the Final Donor List app by adding a new record for payers not in the donor list
-            for(let i = 0; i < resp.records.length; i++){
+            for(let i = resp.records.length - 1; i >= 0; i--){
                 let newPayer = resp.records[i];
                 let newPayerEmail = newPayer.Link.value;
                 if(!payerIsExistingDonor(newPayerEmail, event.records)){
