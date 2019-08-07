@@ -60,6 +60,27 @@
         }
 
 
+        // adds a button to redirect to the Transactions app
+        function buttonToRedirectToTransactions(){
+            //Prevent duplication of the button
+            if (document.getElementById ('my_index_button') != null) {
+                return;
+            }　　　
+            // Set a button
+            let myIndexButton = document.createElement('button');
+            myIndexButton.id = 'my_index_button2';
+            myIndexButton.innerHTML = 'View Transactions';
+            // Button onclick function
+            myIndexButton.onclick = function() {
+                let donorListURL = "https://carrythefuture.kintone.com/k/18/";
+                window.location = donorListURL;
+            }
+            // Retrieve the header menu space element and set the button there
+            kintone.app.getHeaderMenuSpaceElement().appendChild(myIndexButton);
+        }
+
+
+
         let body = {"app": 18}; // app id of the transactions app
         kintone.api(kintone.api.url('/k/v1/records', true), 'GET', body, function(resp) {
             //success
@@ -79,7 +100,8 @@
             // error
             console.log(error);
         })
-        reloadButton();
+        //reloadButton();
+        buttonToRedirectToTransactions();
         console.log("success");
     });
 })();

@@ -92,6 +92,27 @@
        }
 
 
+       // adds a button to redirect to the Final Donor List app
+       function buttonToRedirectToDonorList(){
+            //Prevent duplication of the button
+            if (document.getElementById ('my_index_button') != null) {
+                return;
+            }　　　
+            // Set a button
+            var myIndexButton = document.createElement('button');
+            myIndexButton.id = 'my_index_button';
+            myIndexButton.innerHTML = 'View Updated Final Donor List';
+        
+            // Button onclick function
+            myIndexButton.onclick = function() {
+                let donorListURL = "https://carrythefuture.kintone.com/k/17/";
+                window.location = donorListURL;
+            }
+            // Retrieve the header menu space element and set the button there
+            kintone.app.getHeaderMenuSpaceElement().appendChild(myIndexButton);
+       }
+
+
        // app id of the donors app and field id of the emails
         var body = {
             "app": 17,
@@ -120,7 +141,7 @@
             // error
             console.log(error);
         });            
-        reloadButton();
+        buttonToRedirectToDonorList();
         console.log("success");
     });
     /*
