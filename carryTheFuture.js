@@ -1,21 +1,22 @@
+/*
+current bugs:
+- when multiple records are scaned from transactions and added to donors list for an update,
+duplicated donors are added to donors list if they appear for the first time
+- mismatched numbers for the total number of the donors list records between transactions and donors list
+- automatic duplication of some existing records in the Final Donor List file (not due to this file)
+*/
+
+
 (function(){
     kintone.events.on("app.record.index.show", function(event){
         "use strict";
         console.log(event);
-        let  payerInfo = event.records[1];
-        console.log(payerInfo.Link_1.value); // phone number
-        console.log(payerInfo.Link.value); // email
-        console.log(payerInfo.Text_1.value); // street address        
-        console.log(payerInfo.Text_3.value); // city
-        console.log(payerInfo.Text_4.value); // state
-        console.log(payerInfo.Text_5.value); // zip
-        console.log(payerInfo.Drop_down_0.value); // country 
-
 
         // returns a bool
         // true if payer's email is in donor's list, else false
         function payerIsExistingDonor(payerEmail, donorList){
             for(let i = 0; i < donorList.length; i++){
+                //console.log("donorList.length = ", donorList.length);
                 if(donorList[i].Link.value === payerEmail){ // "Link" is the field id of the email address
                     return true;
                 }
@@ -23,29 +24,6 @@
             return false;
         }
 
-
-        /*
-        now I need to do the following:
-            listen for event when a record is added
-            check if payerIsExistingDonor
-            if false, add the new donor into the existing donor
-            else do nothing
-        */
-       /*
-       function addPayerToDonorIfNew(){
-           // Display the record ID published after saving.
-           kintone.events.on("app.record.create.submit.success", function(event) {
-               var record = event.record;
-               console.log("The record ID is " + record["$id"]["value"] + ".");
-            });
-       }
-       console.log("addPayerToDonorIfNew: ", addPayerToDonorIfNew());
-       //*/
-       /*
-       since I am not sure if the event listner for app.record.create.submit.success is 
-       working well as I cannot see the console log, I will first create the function to 
-       add the record to donor with assumption that event is listened correctly
-       */
 
        // takes payer info from Transactions app and adds a new record in Final Donors List app
        function addPayerToDonor(payerInfo){
@@ -72,9 +50,27 @@
 
 
        // traverse through all the transactions and donor list to compare them to update donor list
-       function updateTheFinalDonorList(){
-           
-       }
+       // update the Final Donor List app by adding a new record for payers not in the donor list
+       // an issue about this function is that after a new record is created,
+       // the Final Donor List does not immediately update, which makes payerIsExisingDonor malfunction
+       function updateTheFinalDonorList(transactions, donorList){
+           let totalTransactions = transactions.records.length;
+           //for(let i = totalTransactions - 1; i >= 0; i--){
+            for(let i = 0; i < totalTransactions; i++){
+               let payer = transactions.records[i];
+               let payerEmail = payer.Link.value;
+               if(!payerIsExistingDonor(payerEmail, donorList.records)){
+                   console.log("donorList = ", donorList);
+                   console.log("donorList.records.length = ", donorList.records.length);
+                   addPayerToDonor(payer);
+                   console.log("donorList = ", donorList);
+                   console.log("donorList.records.length = ", donorList.records.length);
+                   console.log(payerEmail, " is added as a new donor!");
+                }else{
+                    console.log(payerEmail, " already exists in donors list.");
+                }
+            }
+        }
 
 
        // adds a button to reload the page, updating the Final Donor List
@@ -125,23 +121,9 @@
         };
         kintone.api(kintone.api.url('/k/v1/records', true), 'GET', body, function(resp) {
             // success
-            console.log(resp);
+            console.log("donor list length = ", resp.records.length);
             console.log(event);
-            console.log(event.records.length);
-            //console.log("addPayerToDonorIfNew: ", addPayerToDonorIfNew());
-
-            // update the Final Donor List app by adding a new record for payers not in the donor list
-            for(let i = event.records.length - 1; i >= 0; i--){
-                let newPayer = event.records[i];
-                let newPayerEmail = newPayer.Link.value;
-                if(!payerIsExistingDonor(newPayerEmail, resp.records)){
-                    addPayerToDonor(newPayer);
-                    console.log(newPayerEmail, " is added as a new donor!");
-                }else{
-                    console.log(newPayerEmail, " already exists in donors list.");
-                }
-            }
-
+            updateTheFinalDonorList(event, resp);
         }, function(error) {
             // error
             console.log(error);

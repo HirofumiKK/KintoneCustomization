@@ -2,11 +2,13 @@
     kintone.events.on("app.record.index.show", function(event) {
         "use strict";
         console.log(event);
+        console.log(event.records[0]);
 
         // returns a bool
         // true if payer's email is in donor's list, else false
         function payerIsExistingDonor(payerEmail, donorList){
             for(let i = 0; i < donorList.length; i++){
+                console.log("donorList.length = ", donorList.length);
                 if(donorList[i].Link.value === payerEmail){ // "Link" is the field id of the email address
                     return true;
                 }
@@ -35,6 +37,29 @@
                 console.log(resp);
             }), function(error){
                 console.log(error);
+            }
+        }
+
+
+        // traverse through all the transactions and donor list to compare them to update donor list
+        // update the Final Donor List app by adding a new record for payers not in the donor list
+        function updateTheFinalDonorList(transactions, donorList){
+        let totalTransactions = transactions.records.length;
+        //for(let i = totalTransactions - 1; i >= 0; i--){
+        for(let i = 0; i < totalTransactions; i++){
+            let payer = transactions.records[i];
+            let payerEmail = payer.Link.value;
+            if(!payerIsExistingDonor(payerEmail, donorList.records)){
+
+                console.log("donorList = ", donorList);
+                console.log("donorList.records.length = ", donorList.records.length);
+                addPayerToDonor(payer);
+                console.log("donorList = ", donorList);
+                console.log("donorList.records.length = ", donorList.records.length);
+                console.log(payerEmail, " is added as a new donor!");
+                }else{
+                    console.log(payerEmail, " already exists in donors list.");
+                }
             }
         }
 
@@ -80,22 +105,12 @@
         }
 
 
-
         let body = {"app": 18}; // app id of the transactions app
         kintone.api(kintone.api.url('/k/v1/records', true), 'GET', body, function(resp) {
             //success
             console.log(resp);
-            // update the Final Donor List app by adding a new record for payers not in the donor list
-            for(let i = resp.records.length - 1; i >= 0; i--){
-                let newPayer = resp.records[i];
-                let newPayerEmail = newPayer.Link.value;
-                if(!payerIsExistingDonor(newPayerEmail, event.records)){
-                    addPayerToDonor(newPayer);
-                    console.log(newPayerEmail, " is added as a new donor!");
-                }else{
-                    console.log(newPayerEmail, " already exists in donors list.");
-                }
-            }
+            console.log("donor list length = ", event.records.length);
+            updateTheFinalDonorList(resp, event);
         }, function(error) {
             // error
             console.log(error);
