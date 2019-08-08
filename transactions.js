@@ -123,6 +123,18 @@ duplicated donors are added to donors list if they appear for the first time
             // success
             console.log("donor list length = ", resp.records.length);
             console.log(event);
+            /*
+            // maybe try the api call within api call?
+            // such as repeated api calls for each new creation of records/updating the final donor
+            // following is the structure:
+            // apiCall{
+                for loop{
+                    apiCall{
+                        add a record and update the final donor list
+                    }
+                }
+            } 
+            */
             updateTheFinalDonorList(event, resp);
         }, function(error) {
             // error
