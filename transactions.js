@@ -3,15 +3,12 @@ current bugs:
 - when multiple records are scaned from transactions and added to donors list for an update,
 duplicated donors are added to donors list if they appear for the first time
 - mismatched numbers for the total number of the donors list records between transactions and donors list
-- automatic duplication of some existing records in the Final Donor List file (not due to this file)
 */
 
 
 (function(){
     kintone.events.on("app.record.index.show", function(event){
         "use strict";
-        console.log(event);
-
         // returns a bool
         // true if payer's email is in donor's list, else false
         function payerIsExistingDonor(payerEmail, donorList){
@@ -115,29 +112,21 @@ duplicated donors are added to donors list if they appear for the first time
 
 
        // app id of the donors app and field id of the emails
-        var body = {
+        let donorBody = {
             "app": 17,
             "fields": "Link"
         };
-        kintone.api(kintone.api.url('/k/v1/records', true), 'GET', body, function(resp) {
-            // success
-            console.log("donor list length = ", resp.records.length);
-            console.log(event);
-            /*
-            // maybe try the api call within api call?
-            // such as repeated api calls for each new creation of records/updating the final donor
-            // following is the structure:
-            // apiCall{
-                for loop{
-                    apiCall{
-                        add a record and update the final donor list
-                    }
-                }
-            } 
-            */
-            updateTheFinalDonorList(event, resp);
+        let transactionsBody = {"app": 18}; // app id of the transactions app
+        kintone.api(kintone.api.url('/k/v1/records', true), 'GET', donorBody, function(donorResp) {
+            console.log("donor list length = ", donorResp.records.length);
+            kintone.api(kintone.api.url('/k/v1/records', true), 'GET', transactionsBody, function(transactionsResp) {
+                console.log(donorResp);
+                console.log(transactionsResp);
+                updateTheFinalDonorList(transactionsResp, donorResp);
+            }, function(error) {
+                console.log(error);
+            })
         }, function(error) {
-            // error
             console.log(error);
         });            
         buttonToRedirectToDonorList();

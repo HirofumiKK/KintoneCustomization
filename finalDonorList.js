@@ -1,9 +1,6 @@
 (function(){
     kintone.events.on("app.record.index.show", function(event) {
         "use strict";
-        console.log(event);
-        console.log(event.records[0]);
-
         // returns a bool
         // true if payer's email is in donor's list, else false
         function payerIsExistingDonor(payerEmail, donorList){
@@ -64,6 +61,9 @@
         }
 
 
+        // api call for the Final Donor List records
+
+
         // adds a button to reload the page, updating the Final Donor List
         function reloadButton(){
             //Prevent duplication of the button
@@ -105,17 +105,26 @@
         }
 
 
-        let body = {"app": 18}; // app id of the transactions app
-        kintone.api(kintone.api.url('/k/v1/records', true), 'GET', body, function(resp) {
-            //success
-            console.log(resp);
-            console.log("donor list length = ", event.records.length);
-            updateTheFinalDonorList(resp, event);
+       // app id of the donors app and field id of the emails
+       let donorBody = {
+        "app": 17,
+        "fields": "Link"
+    };
+    let transactionsBody = {"app": 18}; // app id of the transactions app
+    kintone.api(kintone.api.url('/k/v1/records', true), 'GET', donorBody, function(donorResp) {
+        console.log("donor list length = ", donorResp.records.length);
+        kintone.api(kintone.api.url('/k/v1/records', true), 'GET', transactionsBody, function(transactionsResp) {
+            console.log(donorResp);
+            console.log(transactionsResp);
+            updateTheFinalDonorList(transactionsResp, donorResp);
         }, function(error) {
-            // error
             console.log(error);
         })
-        //reloadButton();
+    }, function(error) {
+        console.log(error);
+    });       
+
+    //reloadButton();
         buttonToRedirectToTransactions();
         console.log("success");
     });
