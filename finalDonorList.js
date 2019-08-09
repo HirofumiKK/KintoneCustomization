@@ -105,6 +105,21 @@
         }
 
 
+        // remove duplicate records from donor list
+        function removeDuplicateDonors(){
+            let donorBody = {
+                "app": 17,
+                "fields": "Link"
+            };    
+            kintone.api(kintone.api.url('/k/v1/records', true), 'GET', donorBody, function(donorResp) {
+                console.log("donor list length = ", donorResp.records.length);
+                // create a hash table fo
+            }, function(error) {
+                console.log(error);
+            });            
+        }
+
+
        // app id of the donors app and field id of the emails
        let donorBody = {
         "app": 17,
@@ -119,7 +134,7 @@
             updateTheFinalDonorList(transactionsResp, donorResp);
         }, function(error) {
             console.log(error);
-        })
+        });
     }, function(error) {
         console.log(error);
     });       

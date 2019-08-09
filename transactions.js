@@ -2,13 +2,13 @@
 current bugs:
 - when multiple records are scaned from transactions and added to donors list for an update,
 duplicated donors are added to donors list if they appear for the first time
-- mismatched numbers for the total number of the donors list records between transactions and donors list
 */
 
 
 (function(){
     kintone.events.on("app.record.index.show", function(event){
         "use strict";
+
         // returns a bool
         // true if payer's email is in donor's list, else false
         function payerIsExistingDonor(payerEmail, donorList){
@@ -20,6 +20,13 @@ duplicated donors are added to donors list if they appear for the first time
             }
             return false;
         }
+
+
+        /*
+        I wanna have a function that takes either
+             a payer email and outputs a boolean for if it can be added as donor, meaning not duplicate 
+             a list of transactions and outputs a list of transactions that can be added as donor
+        */
 
 
        // takes payer info from Transactions app and adds a new record in Final Donors List app
@@ -111,6 +118,35 @@ duplicated donors are added to donors list if they appear for the first time
        }
 
 
+       async function fetchTransactions(){
+            var params = {
+                'app': 18
+            };
+            let result = await new kintone.Promise(async function(resolve){
+                let promise = await kintone.api('/k/v1/records', 'GET', params).then(async function(resp) {
+                    console.log(resp);
+                    await resolve(resp);
+                    return resp;
+                }); 
+                return promise;
+            });
+            return result;
+       }
+       console.log(fetchTransactions());
+
+       function getTransactions(){
+           var params = {
+               'app': 18
+           };
+           return kintone.api('/k/v1/records', 'GET', params).then(function(resp) {
+               console.log(resp);
+               console.log(event);
+               return resp;
+           });
+       }
+       console.log(getTransactions());
+
+
        // app id of the donors app and field id of the emails
         let donorBody = {
             "app": 17,
@@ -122,13 +158,22 @@ duplicated donors are added to donors list if they appear for the first time
             kintone.api(kintone.api.url('/k/v1/records', true), 'GET', transactionsBody, function(transactionsResp) {
                 console.log(donorResp);
                 console.log(transactionsResp);
-                updateTheFinalDonorList(transactionsResp, donorResp);
+                let transactions = fetchTransactions();
+                console.log(transactions);
+                //updateTheFinalDonorList(transactionsResp, donorResp);
             }, function(error) {
                 console.log(error);
-            })
+            });
         }, function(error) {
             console.log(error);
         });            
+
+        kintone.api(kintone.api.url('/k/v1/records', true), 'GET', donorBody, function(donorResp) {
+            console.log("donor list length = ", donorResp.records.length);
+        }, function(error) {
+            console.log(error);
+        });            
+        
         buttonToRedirectToDonorList();
         console.log("success");
     });
@@ -136,3 +181,21 @@ duplicated donors are added to donors list if they appear for the first time
     // listening event for when a new record is created
 
 })();
+
+
+
+
+// return new kintone.Promise(function(resolve, reject) {
+//     kintone.api('/k/v1/records', 'GET', params, function(resp) {
+//        return something;
+//     })
+
+// }).then(function(){
+//    dosomethingelse()
+// }).then(function({});
+
+/*
+function dosomething(param1, callback) {
+    console.log(param1)
+}
+*/
